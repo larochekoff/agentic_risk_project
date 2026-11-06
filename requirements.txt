@@ -1,0 +1,8 @@
+streamlit==1.32.0
+pandas==2.2.1
+numpy==1.26.4
+langgraph==0.0.26
+langchain-core==0.1.45
+scikit-learn==1.4.1.post1
+lightgbm==4.3.0
+shap==0.45.0
