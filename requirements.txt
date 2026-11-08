@@ -1,5 +1,5 @@
 streamlit==1.32.0
-pandas==2.2.1
+pandas
 numpy==1.26.4
 langgraph==0.0.26
 langchain-core==0.1.45
