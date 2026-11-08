@@ -4,7 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import shap
-
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
@@ -178,12 +177,41 @@ if uploaded_file is not None:
                 shap.summary_plot(sv, X_val_transformed, feature_names=feature_names_out, plot_type="bar", show=False)
                 st.pyplot(fig_shap)
             except Exception as ex:
-                st.warning(f>("Génération du graphique SHAP ignorée ou limitée pour ce format de données : {ex}"))
+                st.warning(f"Génération du graphique SHAP ignorée ou limitée pour ce format de données : {ex}")
 
-            # --- TABLEAU DES PRÉDICTIONS FINALES ---
+            # --- TABLEAU DES PRÉDICTIONS FINALES & VALIDATION HUMAINE ---
             st.markdown("---")
-            st.subheader("🎯 4. Restitution et Scoring Individuel du Portefeuille")
-            st.dataframe(df[['montant_exposition', 'jours_retard', 'PD_Modele', 'IFRS_9_Stage', 'ECL_Provision']].head(15), use_container_width=True)
+            st.subheader("🎯 4. Restitution, Scoring et Validation Humaine du Portefeuille")
+            st.markdown("Surcouche de gouvernance : vous pouvez ajuster manuellement le **Stage IFRS 9** suite à un jugement d'expert qualitatif.")
+
+            # Tableau interactif (Data Editor) permettant l'ajustement du Stage par l'analyste
+            cols_to_display = ['montant_exposition', 'jours_retard', 'PD_Modele', 'IFRS_9_Stage', 'ECL_Provision']
+            df_editable = st.data_editor(
+                df[cols_to_display],
+                num_rows="fixed",
+                column_config={
+                    "IFRS_9_Stage": st.column_config.SelectboxColumn(
+                        "IFRS_9_Stage (Ajustable)",
+                        help="Ajustement manuel du stage par l'expert des risques",
+                        options=stages_labels,
+                        required=True
+                    )
+                },
+                use_container_width=True
+            )
+
+            # Bouton de validation finale et d'export du fichier audité
+            if st.button("Valider et enregistrer le portefeuille ajusté"):
+                df.update(df_editable)
+                csv_valide = df.to_csv(index=False).encode('utf-8')
+                st.success("✅ Portefeuille validé avec succès par l'analyste (Human-in-the-Loop) !")
+                
+                st.download_button(
+                    label="📥 Télécharger le rapport de portefeuille validé (CSV)",
+                    data=csv_valide,
+                    file_name="portefeuille_ifrs9_valide_expert.csv",
+                    mime="text/csv",
+                )
 
             # Sauvegarde en session pour un usage ultérieur
             st.session_state['df_scored'] = df
