@@ -187,18 +187,23 @@ if uploaded_file is not None:
             # Tableau interactif (Data Editor) permettant l'ajustement du Stage par l'analyste
             cols_to_display = ['montant_exposition', 'jours_retard', 'PD_Modele', 'IFRS_9_Stage', 'ECL_Provision']
             df_editable = st.data_editor(
-                df[cols_to_display],
-                num_rows="fixed",
-                column_config={
-                    "IFRS_9_Stage": st.column_config.SelectboxColumn(
-                        "IFRS_9_Stage (Ajustable)",
-                        help="Ajustement manuel du stage par l'expert des risques",
-                        options=stages_labels,
-                        required=True
-                    )
-                },
-                use_container_width=True
+        df[cols_to_display],
+        column_config={
+            "IFRS_9_Stage": st.column_config.SelectboxColumn(
+                "Stage IFRS (Ajustement Expert)",
+                help="Sélectionnez le stage IFRS validé par l'expert",
+                options=[
+                    "Stage 1 (Sain)",
+                    "Stage 2 (Risque Accru)",
+                    "Stage 3 (Défaut Avéré)"
+                ],
+                required=True
             )
+        },
+        disabled=["montant_exposition", "jours_retard", "PD_Modele", "ECL_Provision"],
+        hide_index=True,
+        key="data_editor_portefeuille"
+    )
 
             # Bouton de validation finale et d'export du fichier audité
             if st.button("Valider et enregistrer le portefeuille ajusté"):
